@@ -1,0 +1,41 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WorkHub.API/WorkHub.API.csproj" />
+    <Project Path="src/WorkHub.Shared/WorkHub.Shared.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/AI/">
+    <Project Path="src/Modules/AI/WorkHub.Modules.AI.Application/WorkHub.Modules.AI.Application.csproj" />
+    <Project Path="src/Modules/AI/WorkHub.Modules.AI.Domain/WorkHub.Modules.AI.Domain.csproj" />
+    <Project Path="src/Modules/AI/WorkHub.Modules.AI.Infrastructure/WorkHub.Modules.AI.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Jira/">
+    <Project Path="src/Modules/Jira/WorkHub.Modules.Jira.Application/WorkHub.Modules.Jira.Application.csproj" />
+    <Project Path="src/Modules/Jira/WorkHub.Modules.Jira.Domain/WorkHub.Modules.Jira.Domain.csproj" />
+    <Project Path="src/Modules/Jira/WorkHub.Modules.Jira.Infrastructure/WorkHub.Modules.Jira.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Knowledge/">
+    <Project Path="src/Modules/Knowledge/WorkHub.Modules.Knowledge.Application/WorkHub.Modules.Knowledge.Application.csproj" />
+    <Project Path="src/Modules/Knowledge/WorkHub.Modules.Knowledge.Domain/WorkHub.Modules.Knowledge.Domain.csproj" />
+    <Project Path="src/Modules/Knowledge/WorkHub.Modules.Knowledge.Infrastructure/WorkHub.Modules.Knowledge.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Organization/">
+    <Project Path="src/Modules/Organization/WorkHub.Modules.Organization.Application/WorkHub.Modules.Organization.Application.csproj" />
+    <Project Path="src/Modules/Organization/WorkHub.Modules.Organization.Domain/WorkHub.Modules.Organization.Domain.csproj" />
+    <Project Path="src/Modules/Organization/WorkHub.Modules.Organization.Infrastructure/WorkHub.Modules.Organization.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Tasks/">
+    <Project Path="src/Modules/Tasks/WorkHub.Modules.Tasks.Application/WorkHub.Modules.Tasks.Application.csproj" />
+    <Project Path="src/Modules/Tasks/WorkHub.Modules.Tasks.Domain/WorkHub.Modules.Tasks.Domain.csproj" />
+    <Project Path="src/Modules/Tasks/WorkHub.Modules.Tasks.Infrastructure/WorkHub.Modules.Tasks.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Workspace/">
+    <Project Path="src/Modules/Workspace/WorkHub.Modules.Workspace.Application/WorkHub.Modules.Workspace.Application.csproj" />
+    <Project Path="src/Modules/Workspace/WorkHub.Modules.Workspace.Domain/WorkHub.Modules.Workspace.Domain.csproj" />
+    <Project Path="src/Modules/Workspace/WorkHub.Modules.Workspace.Infrastructure/WorkHub.Modules.Workspace.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WorkHub.IntegrationTests/WorkHub.IntegrationTests.csproj" />
+    <Project Path="tests/WorkHub.UnitTests/WorkHub.UnitTests.csproj" />
+  </Folder>
+</Solution>

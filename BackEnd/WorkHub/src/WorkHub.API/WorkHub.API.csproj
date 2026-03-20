@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Modules\Organization\WorkHub.Modules.Organization.Infrastructure\WorkHub.Modules.Organization.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Tasks\WorkHub.Modules.Tasks.Infrastructure\WorkHub.Modules.Tasks.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Jira\WorkHub.Modules.Jira.Infrastructure\WorkHub.Modules.Jira.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Knowledge\WorkHub.Modules.Knowledge.Infrastructure\WorkHub.Modules.Knowledge.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Workspace\WorkHub.Modules.Workspace.Infrastructure\WorkHub.Modules.Workspace.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\AI\WorkHub.Modules.AI.Infrastructure\WorkHub.Modules.AI.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.12.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
