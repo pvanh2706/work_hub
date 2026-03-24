@@ -152,6 +152,47 @@ Maintain a clean codebase with built-in linting and formatting.
 **🗃️ State Management with Pinia:**
 Handle your app's state with Pinia for clean, organized code.
 
+## Jira Service Integration
+
+Service layer for Jira API integration.
+
+**Location:** `src/services/jira/`
+
+**Shared Infrastructure:** All service modules use the shared `apiCall()` utility from `src/utils/api.ts` for consistent error handling and Result pattern across the application.
+
+**Usage:**
+```typescript
+import { useCreateIssue, IssueType, IssuePriority } from '@/services/jira'
+
+const { loading, result, execute } = useCreateIssue()
+
+await execute({
+  organizationId: '...',
+  projectKey: 'PROJ',
+  summary: 'Issue title',
+  description: 'Description',
+  issueType: IssueType.Bug,
+  priority: IssuePriority.High,
+  issueTypeId: '10001',
+  priorityId: '3'
+})
+
+if (result.value?.isSuccess) {
+  console.log('Created:', result.value.data.issueKey)
+}
+```
+
+**Silent mode (custom error handling):**
+```typescript
+const { execute } = useCreateIssue({ silent: true })
+const result = await execute(data)
+if (!result.isSuccess) {
+  showCustomErrorDialog(result.error)
+}
+```
+
+**API Reference:** See [spec](../docs/superpowers/specs/2026-03-22-jira-frontend-api-integration.md)
+
 ## Update Logs
 
 ### Version 2.0.2 - [December 30, 2025]

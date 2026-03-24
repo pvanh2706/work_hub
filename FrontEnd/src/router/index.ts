@@ -173,6 +173,16 @@ const router = createRouter({
             },
         },
         {
+            path: '/admin/jira-config',
+            name: 'JiraConfig',
+            component: () => import('../views/Admin/JiraConfig/JiraConfig.vue'),
+            meta: {
+                title: 'Jira Configuration',
+                requiresAuth: true,  // TODO: Enable when auth system is ready
+                requiresRole: 'Admin',  // TODO: Enable when auth system is ready
+            },
+        },
+        {
             path: '/products',
             name: 'Products',
             component: () => import('../views/Product/Product.vue'),
