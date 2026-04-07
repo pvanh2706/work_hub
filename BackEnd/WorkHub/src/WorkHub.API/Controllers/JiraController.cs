@@ -16,7 +16,19 @@ namespace WorkHub.API.Controllers;
 public class JiraController : ControllerBase
 {
     private readonly ISender _sender;
-
+    /// <summary>
+    /// ISender là interface của thư viện MediatR, dùng để gửi requests qua mediator pipeline.
+    /// Trong JiraController, nó được inject qua constructor và dùng để dispatch commands/queries.
+    /// 
+    /// Cách hoạt động:
+    /// Thay vì controller gọi trực tiếp service, _sender.Send(command) sẽ tìm IRequestHandler 
+    /// tương ứng và thực thi nó. Ví dụ: _sender.Send(new CreateIssueCommand(...)) 
+    /// → tự động tìm và chạy CreateIssueCommandHandler.
+    /// 
+    /// Lợi ích: Controller không cần biết implementation cụ thể, chỉ cần gửi request — 
+    /// giúp tách biệt tầng API khỏi Application layer (Clean Architecture / CQRS pattern).
+    /// </summary>
+    /// <param name="sender">ISender instance từ MediatR để gửi các command và query</param>
     public JiraController(ISender sender) => _sender = sender;
 
     /// <summary>Tạo Jira issue mới và lưu trạng thái sync</summary>
