@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using AtlassianJira = Atlassian.Jira.Jira;
 using WorkHub.Modules.Jira.Application.Abstractions;
 using WorkHub.Modules.Jira.Domain.Repositories;
 using WorkHub.Modules.Jira.Infrastructure.ExternalServices;
@@ -22,10 +23,10 @@ public static class DependencyInjection
         // toàn ứng dụng. Đây là nguyên tắc của Modular Monolith / Clean Architecture:
         // các module độc lập với nhau, không truy cập trực tiếp vào DB của module khác.
         //
-        // UseNpgsql: dùng PostgreSQL. Connection string lấy từ appsettings.json
-        // (key "DefaultConnection") — không hardcode trong code để dễ đổi môi trường.
+        // UseSqlite: dùng SQLite. Connection string lấy từ appsettings.json
+        // (key "DefaultConnection") — ví dụ: "Data Source=jira.db"
         services.AddDbContext<JiraDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
         // ── Bước 2: Đăng ký các Repository với lifetime Scoped ──────────────────────
         //
@@ -53,30 +54,39 @@ public static class DependencyInjection
         var apiToken = configuration["Jira:ApiToken"]
             ?? throw new InvalidOperationException("Jira:ApiToken is not configured.");
 
-        // ── Bước 4: Đăng ký HttpClient có typed cho IJiraClient ─────────────────────
+        // ── Bước 4: Đăng ký IJiraClient — chọn implementation qua config ────────────
         //
-        // AddHttpClient<Interface, Implementation> = "Typed HttpClient":
-        //   - IHttpClientFactory quản lý vòng đời của HttpMessageHandler bên dưới,
-        //     tránh socket exhaustion nếu tự new HttpClient() liên tục.
-        //   - JiraApiClient được inject IJiraClient interface vào Application layer,
-        //     không cần biết đây là HTTP call ra ngoài.
+        // "Jira:UseSDK": true  → dùng Atlassian.SDK (JiraSdkClient)
+        // "Jira:UseSDK": false → dùng raw HttpClient (JiraApiClient)  ← mặc định
         //
-        // BaseAddress: gắn base URL một lần ở đây, các method trong JiraApiClient
-        // chỉ cần dùng path tương đối (vd: "rest/api/3/issue").
-        //
-        // Authorization Basic: Jira Cloud dùng Basic Auth với email + API token,
-        // encode dạng Base64("{email}:{token}"). Token này được tạo trên Jira account
-        // settings, không phải password tài khoản.
-        //
-        // Accept: application/json: báo với Jira API rằng client muốn nhận JSON.
-        services.AddHttpClient<IJiraClient, JiraApiClient>(client =>
+        // Tại sao tách thành 2 option?
+        //   - SDK: code gọn hơn, có thể dùng được LINQ/object model của Atlassian
+        //   - Raw API: kiểm soát hoàn toàn request/response, dễ debug, không phụ thuộc SDK
+        // Cả hai implement cùng interface IJiraClient nên Application layer
+        // không cần thay đổi gì khi switch.
+        var useSDK = configuration.GetValue<bool>("Jira:UseSDK");
+
+        if (useSDK)
         {
-            client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
-            var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{email}:{apiToken}"));
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Basic", token);
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-        });
+            // SDK tạo ra Atlassian.Jira.Jira object — đây là "connection" đến Jira.
+            // Đăng ký Singleton vì object này thread-safe và tốn chi phí khởi tạo.
+            var jiraConnection = AtlassianJira.CreateRestClient(baseUrl, email, apiToken);
+            services.AddSingleton(jiraConnection);
+            services.AddScoped<IJiraClient, JiraSdkClient>();
+        }
+        else
+        {
+            // Raw HttpClient — IHttpClientFactory quản lý socket pool,
+            // tránh socket exhaustion nếu tự new HttpClient() liên tục.
+            services.AddHttpClient<IJiraClient, JiraApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+                var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{email}:{apiToken}"));
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Basic", token);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+        }
 
         return services;
     }
