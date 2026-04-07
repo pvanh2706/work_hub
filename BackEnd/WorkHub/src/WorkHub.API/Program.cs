@@ -68,9 +68,9 @@ builder.Services.AddJiraModule(builder.Configuration);
 // builder.Services.AddWorkspaceModule(builder.Configuration);
 // builder.Services.AddAIModule(builder.Configuration);
 
-// ── OpenAPI ───────────────────────────────────────────────────────────────────
+// ── Swagger ───────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -80,7 +80,10 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
-    app.MapOpenApi();
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
