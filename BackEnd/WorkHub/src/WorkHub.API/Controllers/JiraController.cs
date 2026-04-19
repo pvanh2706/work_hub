@@ -1,4 +1,5 @@
 ﻿using WorkHub.Modules.Jira.Application.Commands.CreateIssue;
+using WorkHub.Modules.Jira.Application.Commands.CreateIssueAndTransitionToDone;
 using WorkHub.Modules.Jira.Application.Commands.EditIssue;
 using WorkHub.Modules.Jira.Application.Commands.TransitionIssue;
 using WorkHub.Modules.Jira.Application.Queries.GetIssue;
@@ -50,6 +51,35 @@ public class JiraController : ControllerBase
             request.PriorityId,
             request.AssigneeAccountId,
             request.Labels ?? []);
+
+        var result = await _sender.Send(command, ct);
+        return result.IsSuccess
+            ? Ok(result.Value)
+            : BadRequest(new { error = result.Error });
+    }
+
+    /// <summary>Tạo Jira issue mới và tự động chuyển sang trạng thái Done, có thể kèm log work</summary>
+    [HttpPost("issues/create-and-done")]
+    public async Task<IActionResult> CreateIssueAndTransitionToDone(
+        [FromBody] CreateIssueAndDoneRequest request,
+        CancellationToken ct)
+    {
+        var userId = GetCurrentUserId();
+        var command = new CreateIssueAndTransitionToDoneCommand(
+            request.OrganizationId,
+            userId,
+            request.ProjectKey,
+            request.Summary,
+            request.Description,
+            request.IssueType,
+            request.Priority,
+            request.IssueTypeId,
+            request.PriorityId,
+            request.AssigneeAccountId,
+            request.Labels ?? [],
+            request.WorklogTimeSpent,
+            request.WorklogComment,
+            request.WorklogStarted);
 
         var result = await _sender.Send(command, ct);
         return result.IsSuccess
@@ -146,3 +176,24 @@ public record EditIssueRequest(
     List<string>? LabelsToRemove);
 
 public record TransitionIssueRequest(string TransitionId, string? Comment);
+
+/// <summary>
+/// Giống CreateIssueRequest nhưng bổ sung worklog:
+/// - WorklogTimeSpent: thời gian đã làm, ví dụ "2h 30m", "1d"
+/// - WorklogComment: ghi chú worklog (tuỳ chọn)
+/// - WorklogStarted: thời điểm bắt đầu worklog (mặc định UTC now)
+/// </summary>
+public record CreateIssueAndDoneRequest(
+    Guid OrganizationId,
+    string ProjectKey,
+    string Summary,
+    string Description,
+    IssueType IssueType,
+    IssuePriority Priority,
+    string IssueTypeId,
+    string PriorityId,
+    string? AssigneeAccountId,
+    List<string>? Labels,
+    string? WorklogTimeSpent,
+    string? WorklogComment,
+    DateTime? WorklogStarted);

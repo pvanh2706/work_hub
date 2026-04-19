@@ -101,4 +101,54 @@ internal sealed class JiraSdkClient : IJiraClient
 
         await issue.WorkflowTransitionAsync(action.Name, updates, ct);
     }
+
+    /// <summary>
+    /// Override tối ưu: tái sử dụng Issue object đã fetch, tránh round-trip thừa.
+    /// Tạo issue rồi chuyển ngay sang Done trong cùng một luồng.
+    /// </summary>
+    public async Task<JiraCreatedIssue> CreateIssueAndTransitionToDoneAsync(
+        CreateJiraIssueRequest req,
+        CancellationToken ct = default)
+    {
+        // Bước 1: Tạo issue
+        var issue = _jira.CreateIssue(req.ProjectKey);
+        issue.Summary     = req.Summary;
+        issue.Description = req.Description;
+        issue.Type        = new IssueType(req.IssueTypeId);
+        issue.Priority    = new IssuePriority(req.PriorityId);
+
+        if (req.AssigneeAccountId is not null)
+            issue.Assignee = req.AssigneeAccountId;
+
+        foreach (var label in req.Labels)
+            issue.Labels.Add(label);
+
+        var createdKey   = await _jira.Issues.CreateIssueAsync(issue, ct);
+        var createdIssue = await _jira.Issues.GetIssueAsync(createdKey, ct);
+
+        // Bước 2: Tìm và áp dụng transition "Done" ngay trên Issue object vừa fetch
+        var actions    = await createdIssue.GetAvailableActionsAsync(ct);
+        var doneAction = actions.FirstOrDefault(
+            a => a.Name.Equals("Done", StringComparison.OrdinalIgnoreCase));
+
+        if (doneAction is not null)
+            await createdIssue.WorkflowTransitionAsync(doneAction.Name, null, ct);
+
+        // Bước 3: Log work nếu được cung cấp
+        if (req.WorklogTimeSpent is not null)
+        {
+            var worklog = new Worklog(
+                req.WorklogTimeSpent,
+                req.WorklogStarted ?? DateTime.UtcNow,
+                req.WorklogComment);
+
+            await createdIssue.AddWorklogAsync(
+                worklog,
+                WorklogStrategy.AutoAdjustRemainingEstimate,
+                null,
+                ct);
+        }
+
+        return new JiraCreatedIssue(createdIssue.JiraIdentifier, createdKey, string.Empty);
+    }
 }
